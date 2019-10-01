@@ -77,8 +77,8 @@ def test_ActivityTracker():
     amotz_activity_list = ([["6:00", "computer", "playing chess", "8:00", 120, "............"],
                             ["8:00", "exercise", "walking", "10:00", 120, "............"],
                             ["10:00", "food", "rice and vegetables", "12:00", 120, "............"]])
-    ELEMENTS_IN_ACTIVITY_TRACKER = 3
-    for i in range(ELEMENTS_IN_ACTIVITY_TRACKER):
+    ELEMENTS_IN_ACTIVITIES_LIST = 3
+    for i in range(ELEMENTS_IN_ACTIVITIES_LIST):
         assert amotz_tracker.activities_list[i].start_time == amotz_activity_list[i][0]
         assert amotz_tracker.activities_list[i].category == amotz_activity_list[i][1]
         assert amotz_tracker.activities_list[i].activity == amotz_activity_list[i][2]
