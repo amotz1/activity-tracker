@@ -3,54 +3,84 @@ import math
 
 # import sys
 
+def string_to_time_obj(time_string):
+    time = time_string
+    time_datetime_object = datetime.strptime(time, '%H:%M')
+    time_object = time_datetime_object.time()
+    return time_object
+
+
+def test_string_to_time_object():
+    time = string_to_time_obj("6:00")
+    assert time.hour == 6
+
+
+test_string_to_time_object()
+
+
+def calc_time_difference(start_time, end_time):
+    time_difference_timedelta_object = datetime.combine(date.min, end_time) - \
+                                       datetime.combine(date.min, start_time)
+    if time_difference_timedelta_object.total_seconds() < 0:
+        time_difference = int((time_difference_timedelta_object.total_seconds() + 24 * 60 * 60) / 60)
+    else:
+        time_difference = int((time_difference_timedelta_object.total_seconds() / 60))
+    return time_difference
+
+
+def test_calc_time_difference():
+    assert calc_time_difference(string_to_time_obj("6:00"), string_to_time_obj("8:00")) == 120
+
+
+test_calc_time_difference()
+
+
+def visual_time_difference(time_difference):
+    dots = ""
+    for i in range(int(math.floor(time_difference) / 10)):
+        dots = dots + "."
+    return dots
+
+
+def test_visual_time_difference():
+    assert visual_time_difference(120) == "............"
+
+
+test_visual_time_difference()
+
 
 class _Activity:
-    def __init__(self):
-        self.start_time = None
-        self.activity = None
-        self.category = None
-        self.end_time = None
-        self.time_difference = None
-        self.visual_time_difference = None
 
-    def add_start_time(self, start_time):
-        self.start_time = start_time
-
-    def add_activity(self, activity):
+    def __init__(self, start_time, category, activity, end_time):
+        self.start_time = string_to_time_obj(start_time)
+        self.end_time = string_to_time_obj(end_time)
         self.activity = activity
-
-    def add_category(self, category):
         self.category = category
+        self.time_difference = calc_time_difference(self.start_time, self.end_time)
 
-    def add_end_time(self, end_time):
-        self.end_time = end_time
-        start_time_datetime_object = datetime.strptime(self.start_time, '%H:%M')
-        start_time_time_object = start_time_datetime_object.time()
-        end_time_datetime_object = datetime.strptime(self.end_time, '%H:%M')
-        end_time_time_object = end_time_datetime_object.time()
-        time_difference_timedelta_object = datetime.combine(date.min, end_time_time_object) - \
-                                           datetime.combine(date.min, start_time_time_object)
-        if time_difference_timedelta_object.total_seconds() < 0:
-            self.time_difference = int((time_difference_timedelta_object.total_seconds() + 24 * 60 * 60) / 60)
-        else:
-            self.time_difference = int((time_difference_timedelta_object.total_seconds() / 60))
-        dots = ""
-        for i in range(int(math.floor(self.time_difference) / 10)):
-            dots = dots + "."
-        self.visual_time_difference = dots
+    def get_start_time(self):
+        return self.start_time
+
+    def get_activity(self):
+        return self.activity
+
+    def get_category(self):
+        return self.category
+
+    def get_end_time(self):
+        return self.end_time
+
+    def get_time_difference(self):
+        return self.time_difference
 
 
 def test__Activity():
-    amotz_activity = _Activity()
-    amotz_activity.add_start_time("6:00")
-    amotz_activity.add_category("computer")
-    amotz_activity.add_activity("playing chess")
-    amotz_activity.add_end_time("8:00")
-    assert amotz_activity.start_time == "6:00"
-    assert amotz_activity.activity == "playing chess"
-    assert amotz_activity.time_difference == 120.0
-    assert amotz_activity.category == "computer"
-    assert amotz_activity.end_time == "8:00"
+    amotz_activity = _Activity("6:00", "computer", "playing chess", "8:00")
+    assert amotz_activity.get_start_time().hour == 6
+    assert amotz_activity.get_activity() == "playing chess"
+    assert amotz_activity.get_category() == "computer"
+    assert amotz_activity.get_end_time().hour == 8
+    assert amotz_activity.get_time_difference() == 120
 
 
 test__Activity()
@@ -61,36 +91,53 @@ class ActivityTracker:
         self.activities_list = []
 
     def add_activity(self, start_time, category, activity, end_time):
-        new_activity = _Activity()
-        new_activity.add_start_time(start_time)
-        new_activity.add_category(category)
-        new_activity.add_activity(activity)
-        new_activity.add_end_time(end_time)
+        new_activity = _Activity(start_time, category, activity, end_time)
         self.activities_list.append(new_activity)
+
+    def calc_category_total_time(self, category):
+        total_time = 0
+        for i in range(len(self.activities_list)):
+            if self.activities_list[i].get_category() == category:
+                total_time += self.activities_list[i].time_difference
+        return total_time
+
+# def calc_category_mean_time(self,category):
+#
+# def calc_category_max_time(self,category):
+#
+# def calc_category_min_time(self,category):
+#
+# def calc_category_std(self,category):
+#
+# def show_in_chronological_order(self):
 
 
 def test_ActivityTracker():
     amotz_tracker = ActivityTracker()
     amotz_tracker.add_activity("6:00", "computer", "playing chess", "8:00")
-    amotz_tracker.add_activity("8:00", "exercise", "walking", "10:00")
+    amotz_tracker.add_activity("8:00", "computer", "doing a project", "10:00")
     amotz_tracker.add_activity("10:00", "food", "rice and vegetables", "12:00")
-    amotz_activity_list = ([["6:00", "computer", "playing chess", "8:00", 120, "............"],
-                            ["8:00", "exercise", "walking", "10:00", 120, "............"],
-                            ["10:00", "food", "rice and vegetables", "12:00", 120, "............"]])
+    amotz_activity_list = ([[6, "computer", "playing chess", 8, 120],
+                            [8, "computer", "doing a project", 10, 120],
+                            [10, "food", "rice and vegetables", 12, 120]])
     ELEMENTS_IN_ACTIVITIES_LIST = 3
     for i in range(ELEMENTS_IN_ACTIVITIES_LIST):
-        assert amotz_tracker.activities_list[i].start_time == amotz_activity_list[i][0]
-        assert amotz_tracker.activities_list[i].category == amotz_activity_list[i][1]
-        assert amotz_tracker.activities_list[i].activity == amotz_activity_list[i][2]
-        assert amotz_tracker.activities_list[i].end_time == amotz_activity_list[i][3]
-        assert amotz_tracker.activities_list[i].time_difference == amotz_activity_list[i][4]
-        assert amotz_tracker.activities_list[i].visual_time_difference == amotz_activity_list[i][5]
-
+        assert amotz_tracker.activities_list[i].get_start_time().hour == amotz_activity_list[i][0]
+        assert amotz_tracker.activities_list[i].get_category() == amotz_activity_list[i][1]
+        assert amotz_tracker.activities_list[i].get_activity() == amotz_activity_list[i][2]
+        assert amotz_tracker.activities_list[i].get_end_time().hour == amotz_activity_list[i][3]
+        assert amotz_tracker.activities_list[i].get_time_difference() == amotz_activity_list[i][4]
+    print(amotz_tracker.calc_category_total_time("computer"))
+    assert amotz_tracker.calc_category_total_time("computer") == 240
+    # assert amotz_tracker.calc_category_mean_time("computer") == 120
+    # assert amotz_tracker.calc_category_max_time("computer") == 120
+    # assert amotz_tracker.calc_category_min_time("computer") == 120
+    # assert amotz_tracker.calc_category_std("computer") == 120
 
 test_ActivityTracker()
-
-# def testing_activity_tracker():
-#     amotz_tracker = ActivityTracker()
+#
+# # def testing_activity_tracker():
+# #     amotz_tracker = ActivityTracker()
 #     amotz_tracker.add_start_time('6:00')
 #     amotz_tracker.add_start_time('8:00')
 #     assert amotz_tracker.tracker_list_start_time == ['6:00', '8:00']
