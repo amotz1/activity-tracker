@@ -1,6 +1,7 @@
 from datetime import datetime, date
 import math
 
+
 # import sys
 
 def string_to_time_obj(time_string):
@@ -101,6 +102,7 @@ class ActivityTracker:
                 total_time += self.activities_list[i].time_difference
         return total_time
 
+
 # def calc_category_mean_time(self,category):
 #
 # def calc_category_max_time(self,category):
@@ -133,6 +135,7 @@ def test_ActivityTracker():
     # assert amotz_tracker.calc_category_max_time("computer") == 120
     # assert amotz_tracker.calc_category_min_time("computer") == 120
     # assert amotz_tracker.calc_category_std("computer") == 120
+
 
 test_ActivityTracker()
 #
@@ -192,3 +195,4 @@ test_ActivityTracker()
 #
 #
 # activity_tracker()
+#
