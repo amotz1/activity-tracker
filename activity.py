@@ -1,5 +1,7 @@
 from datetime import datetime, date
 import math
+import statistics
+import json
 
 
 # import sys
@@ -91,6 +93,9 @@ class ActivityTracker:
     def __init__(self):
         self.activities_list = []
 
+    def get_activities_list(self):
+        return self.activities_list
+
     def add_activity(self, start_time, category, activity, end_time):
         new_activity = _Activity(start_time, category, activity, end_time)
         self.activities_list.append(new_activity)
@@ -102,11 +107,56 @@ class ActivityTracker:
                 total_time += self.activities_list[i].time_difference
         return total_time
 
+    def calc_category_mean_time(self, category):
+        count = 0
+        for i in range(len(self.activities_list)):
+            if self.activities_list[i].get_category() == category:
+                count += 1
+        category_mean_time = self.calc_category_total_time(category) / count
+        return category_mean_time
 
-# def calc_category_mean_time(self,category):
-#
-# def calc_category_max_time(self,category):
-#
+    def calc_category_max_time(self, category):
+        activities_durations_list = []
+        for i in range(len(self.activities_list)):
+            if self.activities_list[i].get_category() == category:
+                activities_durations_list.append(self.activities_list[i].get_time_difference())
+        max_activities_duration = max(activities_durations_list)
+        return max_activities_duration
+
+    def calc_category_min_time(self, category):
+        activities_durations_list = []
+        for i in range(len(self.activities_list)):
+            if self.activities_list[i].get_category() == category:
+                activities_durations_list.append(self.activities_list[i].get_time_difference())
+        min_activities_duration = min(activities_durations_list)
+        return min_activities_duration
+
+
+def activities_serialization():
+    amotz_tracker = ActivityTracker()
+    amotz_tracker.add_activity("6:00", "computer", "playing chess", "8:00")
+    for object_idx in amotz_tracker.get_activities_list():
+        object_idx.start_time = str(object_idx.get_start_time())
+        object_idx.end_time = str(object_idx.get_end_time())
+    with open('amotz_tracker_information.txt', 'w+') as outfile:
+        my_list = []
+        for object_idx in range(len(amotz_tracker.get_activities_list())):
+            my_list.append(amotz_tracker.get_activities_list()[object_idx].__dict__)
+        json.dump(my_list, outfile)
+
+
+def test_serialization():
+    activities_serialization()
+    with open('amotz_tracker_information.txt', 'r') as outfile:
+        amotz_tracker_information_txt_contents = json.load(outfile)
+    assert amotz_tracker_information_txt_contents == [
+        {'start_time': '06:00:00', 'end_time': '08:00:00', 'activity': 'playing chess', 'category': 'computer',
+         'time_difference': 120}]
+
+
+test_serialization()
+
+
 # def calc_category_min_time(self,category):
 #
 # def calc_category_std(self,category):
@@ -129,11 +179,10 @@ def test_ActivityTracker():
         assert amotz_tracker.activities_list[i].get_activity() == amotz_activity_list[i][2]
         assert amotz_tracker.activities_list[i].get_end_time().hour == amotz_activity_list[i][3]
         assert amotz_tracker.activities_list[i].get_time_difference() == amotz_activity_list[i][4]
-    print(amotz_tracker.calc_category_total_time("computer"))
     assert amotz_tracker.calc_category_total_time("computer") == 240
-    # assert amotz_tracker.calc_category_mean_time("computer") == 120
-    # assert amotz_tracker.calc_category_max_time("computer") == 120
-    # assert amotz_tracker.calc_category_min_time("computer") == 120
+    assert amotz_tracker.calc_category_mean_time("computer") == 120
+    assert amotz_tracker.calc_category_max_time("computer") == 120
+    assert amotz_tracker.calc_category_min_time("computer") == 120
     # assert amotz_tracker.calc_category_std("computer") == 120
 
 
